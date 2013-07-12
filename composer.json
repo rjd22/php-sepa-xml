@@ -1,10 +1,15 @@
 {
     "name": "digitick/php-sepa-xml",
-    "description": "SEPA file generator in PHP",
-    "license": "GNU",
+    "type": "library",
+    "description": "Creates an XML file for a Single Euro Payments Area (SEPA) Credit Transfer.",
+    "keywords": ["banking", "sepa", "xml"],
+    "license": "GNU Lesser General Public License v3.0",
     "authors": [
         {
-            "name": "Digitick",
+            "name": "Ianaré Sévi",
+        },
+        {
+            "name": "Digitick, SA",
             "email": "info@digitick.net"
         }
     ],
@@ -13,6 +18,5 @@
     },
     "autoload": {
         "psr-0": { "Digitick\\Sepa": "lib/" }
-    },
-    "target-dir": "Digitick/Sepa"
+    }
 }
