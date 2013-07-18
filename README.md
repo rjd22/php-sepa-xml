@@ -15,9 +15,19 @@ Verify generated files with your bank before using!!!
 
 **API subject to change.**
 
+##Installation
+###Composer
+This library is available in packagist.org, you can add it to your project
+via Composer.
+
+In the "require" section of your composer.json file:
+```javascript
+"digitick/sepa-xml" : "dev-namespace"
+```
+
 ##Usage
 ```php
-$sepaFile = new SepaTransferFile();
+$sepaFile = new TransferFile();
 $sepaFile->messageIdentification = 'transferID';
 $sepaFile->initiatingPartyName = 'Me';
 
