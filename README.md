@@ -6,8 +6,8 @@ SEPA file generator for PHP.
 Creates an XML file for a Single Euro Payments Area (SEPA) Credit Transfer.
 
 ```
-The version of the standard followed for credit is: _pain.001.001.03_
-The version of the standard followed for debit is: _pain.008.001.02_
+The version of the standard followed for credit is: pain.001.001.03
+The version of the standard followed for debit is: pain.008.001.02
 ```
 
 License: GNU Lesser General Public License v3.0
