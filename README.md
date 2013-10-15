@@ -5,7 +5,8 @@ SEPA file generator for PHP.
 
 Creates an XML file for a Single Euro Payments Area (SEPA) Credit Transfer.
 
-The version of the standard followed is: _pain.001.001.03_
+The version of the standard followed for credit is: _pain.001.001.03_
+The version of the standard followed for debit is: _pain.008.001.02_
 
 License: GNU Lesser General Public License v3.0
 
@@ -29,7 +30,7 @@ Specific minor version, API stability
 "digitick/sepa-xml" : "0.9.*"
 ```
 
-##Usage
+##Usage Credit Transfer
 ```php
 $sepaFile = new SepaTransferFile();
 $sepaFile->messageIdentification = 'transferID';
@@ -70,5 +71,49 @@ echo $sepaFile->asXML();
 
 /* After generating the file, these two values can be retrieved: */
 echo $sepaFile->getHeaderControlSumCents();
-echo $payment1->getPaymentControlSumCents();
+echo $payment1->getTransactionControlSumCents();
+```
+
+##Usage Debit Transfer
+```php
+$sepaFile = new SepaTransferFile('debit');
+$sepaFile->messageIdentification = 'transferID';
+$sepaFile->initiatingPartyName = 'Me';
+
+/*
+ * Add a payment to the SEPA file. This method
+ * may be called more than once to add multiple
+ * payments to the same file.
+ */
+$payment1 = $sepaFile->addCollectInfo(array(
+	'id'						=> 'Payment Info ID',
+	'creditorName'				=> 'My Corp',
+	'creditorAccountIBAN'		=> 'MY_ACCOUNT_IBAN',
+	'creditorAgentBIC'			=> 'MY_BANK_BIC'
+//	'creditorAccountCurrency'	=> 'GPB', // optional, defaults to 'EUR'
+//	'categoryPurposeCode'		=> 'SUPP', // optional, defaults to NULL
+//	'requestedExecutionDate 	=> '2014-1-28', // optional, defaults to current date
+));
+
+/*
+ * Add a credit transfer to the payment. This method
+ * may be called more than once to add multiple
+ * transfers for the same payment.
+ */
+$payment1->addDebitTransfer(array(
+	'id'					=> 'Id shown in bank statement',
+	'currency'				=> 'EUR',
+	'amount'				=> '0.02', // or as float: 0.02 or as integer: 2
+	'debtorBIC'				=> 'THEIR_BANK_BIC',
+	'debtorName'			=> 'THEIR_NAME',
+	'debtorAccountIBAN'		=> 'THEIR_IBAN',
+	'remittanceInformation'	=> 'Transaction description',
+));
+
+/* Generate the file and return the XML string. */
+echo $sepaFile->asXML();
+
+/* After generating the file, these two values can be retrieved: */
+echo $sepaFile->getHeaderControlSumCents();
+echo $payment1->getTransactionControlSumCents();
 ```

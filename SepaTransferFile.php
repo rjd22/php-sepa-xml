@@ -25,10 +25,13 @@
  * @author Jérémy Cambon
  * @author Ianaré Sévi
  * @author Vincent MOMIN
+ * @author Robert-Jan de Dreu
  */
 require 'lib/SepaFileBlock.php';
 require 'lib/SepaPaymentInfo.php';
+require 'lib/SepaCollectInfo.php';
 require 'lib/SepaCreditTransfer.php';
+require 'lib/SepaDebitTransfer.php';
 
 /**
  * SEPA payments file object.
@@ -73,16 +76,33 @@ class SepaTransferFile extends SepaFileBlock
 	 */
 	protected $xml;
 	/**
-	 * @var SepaPaymentInfo[]
+	 * @var string
 	 */
-	protected $payments = array();
+	protected $type;
+	/**
+	 * @var SepaPaymentInfo[], SepaCollectInfo[]
+	 */
+	protected $transactions = array();
 
-	const INITIAL_STRING = '<?xml version="1.0" encoding="UTF-8"?><Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"></Document>';
+	const CREDIT_STRING = '<?xml version="1.0" encoding="UTF-8"?><Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"></Document>';
+	const DEBIT_STRING = '<?xml version="1.0" encoding="UTF-8"?><Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02"></Document>';
 
-	public function __construct()
+	public function __construct($type = 'credit')
 	{
-		$this->xml = simplexml_load_string(self::INITIAL_STRING);
-		$this->xml->addChild('CstmrCdtTrfInitn');
+		if ($type == 'debit')
+		{
+			$this->xml = simplexml_load_string(self::DEBIT_STRING);
+			$this->xml->addChild('CstmrDrctDbtInitn');
+
+			$this->type = 'debit';
+		}
+		else
+		{
+			$this->xml = simplexml_load_string(self::CREDIT_STRING);
+			$this->xml->addChild('CstmrCdtTrfInitn');
+
+			$this->type = 'credit';
+		}
 	}
 	
 	/**
@@ -105,10 +125,10 @@ class SepaTransferFile extends SepaFileBlock
 	}
 
 	/**
-	 * Get the payment control sum in cents.
+	 * Get the transaction control sum in cents.
 	 * @return integer
 	 */
-	public function getPaymentControlSumCents()
+	public function getTransactionControlSumCents()
 	{
 		return $this->controlSumCents;
 	}
@@ -123,20 +143,35 @@ class SepaTransferFile extends SepaFileBlock
 		$payment = new SepaPaymentInfo($this);
 		$payment->setInfo($paymentInfo);
 		
-		$this->payments[] = $payment;
+		$this->transactions[] = $payment;
 		
 		return $payment;
 	}
 
 	/**
-	 * Update counters related to "Payment Information" blocks.
+	 * Set the information for the "Collect Information" block.
+	 * @param array $collectInfo
+	 * @return SepaCollectInfo
 	 */
-	protected function updatePaymentCounters()
+	public function addCollectInfo(array $collectInfo)
+	{
+		$collect = new SepaCollectInfo($this);
+		$collect->setInfo($collectInfo);
+
+		$this->transactions[] = $collect;
+
+		return $collect;
+	}
+
+	/**
+	 * Update counters related to "Transaction Information" blocks.
+	 */
+	protected function updateTransactionCounters()
 	{
 		$this->numberOfTransactions = 0;
 		$this->controlSumCents = 0;
 		
-		foreach ($this->payments as $payment) {
+		foreach ($this->transactions as $payment) {
 			$this->numberOfTransactions += $payment->getNumberOfTransactions();
 			$this->controlSumCents += $payment->getControlSumCents();
 		}
@@ -147,14 +182,19 @@ class SepaTransferFile extends SepaFileBlock
 	 */
 	protected function generateXml()
 	{
-		$this->updatePaymentCounters();
+		$this->updateTransactionCounters();
 		
 		$datetime = new DateTime();
 		$creationDateTime = $datetime->format('Y-m-d\TH:i:s');
 
 		// -- Group Header -- \\
 
-		$GrpHdr = $this->xml->CstmrCdtTrfInitn->addChild('GrpHdr');
+		if ($this->type == 'debit') {
+			$GrpHdr = $this->xml->CstmrDrctDbtInitn->addChild('GrpHdr');
+		} else {
+			$GrpHdr = $this->xml->CstmrCdtTrfInitn->addChild('GrpHdr');
+		}
+
 		$GrpHdr->addChild('MsgId', $this->messageIdentification);
 		$GrpHdr->addChild('CreDtTm', $creationDateTime);
 		if ($this->isTest)
@@ -167,7 +207,7 @@ class SepaTransferFile extends SepaFileBlock
 			$GrpHdr->addChild('InitgPty')->addChild('Id', $this->initiatingPartyId);
 
 		// -- Payment Information --\\
-		foreach ($this->payments as $payment) {
+		foreach ($this->transactions as $payment) {
 			$this->xml = $payment->generateXml($this->xml);
 		}
 	}
