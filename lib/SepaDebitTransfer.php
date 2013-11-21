@@ -108,8 +108,9 @@ class SepaDebitTransfer extends SepaFileBlock
 		$PmtId->addChild('InstrId', $this->id);
 		$PmtId->addChild('EndToEndId', $this->endToEndId);
 		$DrctDbtTxInf->addChild('InstdAmt', $amount)->addAttribute('Ccy', $this->currency);
+		$FinInstnId = $DrctDbtTxInf->addChild('DbtrAgt')->addChild('FinInstnId');
 		if ($this->debtorBIC) {
-			$DrctDbtTxInf->addChild('DbtrAgt')->addChild('FinInstnId')->addChild('BIC', $this->debtorBIC);
+			$FinInstnId->addChild('BIC', $this->debtorBIC);
 		}
 		$DrctDbtTxInf->addChild('Dbtr')->addChild('Nm', htmlentities($this->debtorName));
 		$DrctDbtTxInf->addChild('DbtrAcct')->addChild('Id')->addChild('IBAN', $this->debtorAccountIBAN);
