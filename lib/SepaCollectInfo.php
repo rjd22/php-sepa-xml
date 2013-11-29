@@ -63,6 +63,10 @@ class SepaCollectInfo extends SepaFileBlock
 	 */
 	protected $localInstrumentCode;
 	/**
+	 * @var string Sequence Type. Identifies the direct debit sequence, such as first, recurrent, final or one-off (FRST, RCUR, FNAL, OOFF)
+	 */
+	protected $sequenceType;
+	/**
 	 * @var integer
 	 */
 	protected $controlSumCents = 0;
@@ -230,6 +234,8 @@ class SepaCollectInfo extends SepaFileBlock
 		$PmtInf->addChild('PmtTpInf')->addChild('SvcLvl')->addChild('Cd', 'SEPA');
 		if ($this->localInstrumentCode)
 			$PmtInf->PmtTpInf->addChild('LclInstrm')->addChild('Cd', $this->localInstrumentCode);
+		if ($this->sequenceType)
+			$PmtInf->PmtTpInf->addChild('SeqTp', $this->sequenceType);
 		
 		$PmtInf->addChild('ReqdColltnDt', $requestedExecutionDate);
 		$PmtInf->addChild('Cdtr')->addChild('Nm', htmlentities($this->creditorName));
