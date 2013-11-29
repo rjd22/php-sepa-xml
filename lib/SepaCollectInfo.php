@@ -108,6 +108,9 @@ class SepaCollectInfo extends SepaFileBlock
 		}
 		if (isset($collectInfo['localInstrumentCode']))
 			$this->setLocalInstrumentCode($collectInfo['localInstrumentCode']);
+
+		if (isset($collectInfo['sequenceType']))
+			$this->setSequenceType($collectInfo['sequenceType']);
 		
 		if (isset($collectInfo['collectMethod']))
 			$this->setCollectMethod($collectInfo['collectMethod']);
@@ -142,6 +145,20 @@ class SepaCollectInfo extends SepaFileBlock
 			throw new Exception("Invalid Local Instrument Code: $code");
 		}
 		$this->localInstrumentCode = $code;
+	}
+	
+	/**
+	 * Set the sequence type.
+	 * @param string $code
+	 * @throws Exception
+	 */
+	public function setSequenceType($code)
+	{
+		$code = strtoupper($code);
+		if (!in_array($code, array('FRST', 'RCUR', 'FNAL', 'OOFF'))) {
+			throw new Exception("Invalid Local Instrument Code: $code");
+		}
+		$this->sequenceType = $code;
 	}
 	
 	/**
