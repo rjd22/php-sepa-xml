@@ -146,7 +146,7 @@ class SepaCollectInfo extends SepaFileBlock
 		}
 		$this->localInstrumentCode = $code;
 	}
-	
+
 	/**
 	 * Set the sequence type.
 	 * @param string $code
