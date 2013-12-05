@@ -49,6 +49,18 @@ class SepaDebitTransfer extends SepaFileBlock
 	 * @var string Remittance information.
 	 */
 	public $remittanceInformation;
+	/**
+	 * @var string Mandate Identification
+	 */
+	public $mandateIdentification;
+	/**
+	 * @var string Mandate Date Of Signature
+	 */
+	public $mandateDateOfSignature = '2009-11-01';
+	/**
+	 * @var string Mandate Amendment Indicator
+	 */
+	public $mandateAmendmentIndicator = 'false';
 
 	/**
 	 * @var string ISO currency code
@@ -108,6 +120,12 @@ class SepaDebitTransfer extends SepaFileBlock
 		$PmtId->addChild('InstrId', $this->id);
 		$PmtId->addChild('EndToEndId', $this->endToEndId);
 		$DrctDbtTxInf->addChild('InstdAmt', $amount)->addAttribute('Ccy', $this->currency);
+		if ($this->mandateIdentification) {
+			$MndtRltdInf = $DrctDbtTxInf->addChild('DrctDbtTx')->addChild('MndtRltdInf');
+			$MndtRltdInf->addChild('MndtId', $this->mandateIdentification);
+			$MndtRltdInf->addChild('DtOfSgntr', $this->mandateDateOfSignature);
+			$MndtRltdInf->addChild('AmdmntInd', $this->mandateAmendmentIndicator);
+		}
 		$FinInstnId = $DrctDbtTxInf->addChild('DbtrAgt')->addChild('FinInstnId');
 		if ($this->debtorBIC) {
 			$FinInstnId->addChild('BIC', $this->debtorBIC);

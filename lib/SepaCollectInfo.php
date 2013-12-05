@@ -205,7 +205,9 @@ class SepaCollectInfo extends SepaFileBlock
 		$transfer = new SepaDebitTransfer();
 		$values = array(
 			'id', 'debtorBIC', 'debtorName',
-			'debtorAccountIBAN', 'remittanceInformation'
+			'debtorAccountIBAN', 'remittanceInformation',
+			'mandateIdentification', 'mandateDateOfSignature',
+			'mandateAmendmentIndicator'
 		);
 		foreach ($values as $name) {
 			if (isset($transferInfo[$name]))
