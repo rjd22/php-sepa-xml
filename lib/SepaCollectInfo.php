@@ -46,6 +46,10 @@ class SepaCollectInfo extends SepaFileBlock
 	 */
 	public $creditorAgentBIC;
 	/**
+	 * @var string Creditor's Scheme Identification Code
+	 */
+	public $creditorSchemeIdentification;
+	/**
 	 * @var string When to process the payment (in Y-m-d format)
 	 */
 	public $requestedExecutionDate;
@@ -100,7 +104,8 @@ class SepaCollectInfo extends SepaFileBlock
 	{
 		$values = array(
 			'id', 'categoryPurposeCode', 'creditorName', 'creditorAccountIBAN',
-			'creditorAgentBIC', 'creditorAccountCurrency', 'requestedCollectionDate'
+			'creditorAgentBIC', 'creditorSchemeIdentification',
+			'creditorAccountCurrency', 'requestedCollectionDate'
 		);
 		foreach ($values as $name) {
 			if (isset($collectInfo[$name]))
@@ -265,6 +270,12 @@ class SepaCollectInfo extends SepaFileBlock
 
 		$PmtInf->addChild('CdtrAgt')->addChild('FinInstnId')->addChild('BIC', $this->creditorAgentBIC);
 		$PmtInf->addChild('ChrgBr', 'SLEV');
+
+		if ($this->creditorSchemeIdentification) {
+			$Othr = $PmtInf->addChild('CdtrSchmeId')->addChild('Id')->addChild('PrvtId')->addChild('Othr');
+			$Othr->addChild('Id', $this->creditorSchemeIdentification);
+			$Othr->addChild('SchmeNm')->addChild('Prtry', 'SEPA');
+		}
 
 		// -- Credit Transfer Transaction Information --\\
 
